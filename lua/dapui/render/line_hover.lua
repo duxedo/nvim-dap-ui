@@ -56,10 +56,15 @@ function M.show()
   local line_content = vim.fn.getline("."):sub(orig_col + 1)
   local content_width = vim.str_utfindex(line_content)
 
-  if vim.fn.screencol() + content_width > vim.opt.columns:get() then
-    orig_col = 0
+  local rows = 1
+  local totalSpace = vim.opt.columns:get()
+  if vim.fn.screencol() + content_width > totalSpace then
+    orig_col = 1
     line_content = vim.fn.getline(".")
     content_width = vim.str_utfindex(line_content)
+    if content_width > totalSpace then
+      rows = math.ceil(content_width / totalSpace) + 1
+    end
   end
 
   if
@@ -85,7 +90,7 @@ function M.show()
   local win_opts = {
     relative = "cursor",
     width = content_width,
-    height = 1,
+    height = rows,
     style = "minimal",
     row = 0,
     col = 0,
@@ -111,6 +116,7 @@ function M.show()
 
     api.nvim_win_call(window_id, function()
       vim.opt.winhighlight:append({ NormalFloat = "Normal" })
+      vim.opt.wrap = true
     end)
   end
 
@@ -118,7 +124,6 @@ function M.show()
     local _, _, col, details = unpack(mark)
     if not details.end_col or details.end_col > orig_col then
       details.end_row = 0
-      details.ns_id = nil
       details.end_col = details.end_col and (details.end_col - orig_col)
       col = math.max(col, orig_col)
       local ok, error =
