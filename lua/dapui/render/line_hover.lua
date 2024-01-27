@@ -57,9 +57,10 @@ function M.show()
   local content_width = vim.str_utfindex(line_content)
 
   local rows = 1
-  local totalSpace = vim.opt.columns:get()
+  local hoffset = 2
+  local totalSpace = vim.opt.columns:get() - hoffset
   if vim.fn.screencol() + content_width > totalSpace then
-    orig_col = 1
+    orig_col = 1 + hoffset
     line_content = vim.fn.getline(".")
     content_width = vim.str_utfindex(line_content)
     if content_width > totalSpace then
